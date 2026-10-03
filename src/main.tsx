@@ -4,6 +4,7 @@ import { GameScene } from './three/GameScene'
 import { useGameStore } from './store/gameStore'
 import { useStageStore } from './store/stageStore'
 import { Overlay } from './ui/Overlay'
+import { installFullscreen } from './ui/touch'
 import { fx } from './three/fx'
 import { kickStats, musicBeat } from './three/audio'
 import { installKeys, installSound } from './three/director'
@@ -20,6 +21,7 @@ import './index.css'
 
 installKeys()
 installSound()
+installFullscreen()
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
