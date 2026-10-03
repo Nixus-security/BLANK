@@ -1,0 +1,99 @@
+@import "tailwindcss";
+
+@theme {
+  --font-crt: "VT323", ui-monospace, monospace;
+  --font-hand: "Nothing You Could Do", "Segoe Script", cursive;
+  --color-blood: #b3261e;
+  --color-bone: #d8d0b8;
+  --color-rust: #8a5a2b;
+}
+
+@keyframes banner {
+  0% { opacity: 0; }
+  15%, 75% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+@keyframes paper {
+  from { opacity: 0; transform: translateY(40px) rotate(-3deg); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes stamp {
+  from { opacity: 0; transform: rotate(-12deg) scale(2.2); }
+  to { opacity: 0.85; transform: rotate(-12deg) scale(1); }
+}
+
+/* « TU ES MORT » : le texte claque à l'écran (gros, flou), se pose d'un coup, tremble, puis se stabilise */
+@keyframes deathtext {
+  0% { opacity: 0; transform: scale(1.55); filter: blur(7px); }
+  5% { opacity: 1; transform: scale(0.97); filter: blur(0); }
+  8% { transform: translate(-7px, 3px); }
+  11% { transform: translate(8px, -4px); }
+  14% { transform: translate(-5px, 3px); }
+  17% { transform: translate(4px, -2px); }
+  21%, 100% { opacity: 1; transform: none; filter: blur(0); }
+}
+
+/* « THE END » : apparaît lentement, tient, puis s'efface */
+@keyframes endtitle {
+  0% { opacity: 0; letter-spacing: 0.9em; filter: blur(6px); }
+  35% { opacity: 1; filter: blur(0); }
+  75% { opacity: 1; }
+  100% { opacity: 0; letter-spacing: 0.5em; }
+}
+
+@keyframes endveil {
+  0% { opacity: 0; }
+  35%, 75% { opacity: 0.72; }
+  100% { opacity: 0; }
+}
+
+/* générique : du bas de l'écran jusqu'au-dessus du haut */
+@keyframes creditsroll {
+  from { transform: translateY(0); }
+  to { transform: translateY(-100%) translateY(-100vh); }
+}
+
+@keyframes fadein {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+html {
+  font-size: 18px; /* base rem des classes Tailwind de l'UI */
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  height: 100%;
+  background: #000;
+  overflow: hidden;
+  overscroll-behavior: none;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+}
+
+/* le canvas gère lui-même les gestes (tracé de la signature, tirs) : pas de défilement ni de zoom du navigateur */
+canvas {
+  touch-action: none;
+}
+
+/* téléphone en paysage : écran bas, on réduit toute l'interface (les classes Tailwind sont en rem) */
+@media (max-height: 520px) {
+  html {
+    font-size: 13px;
+  }
+}
+@media (max-height: 380px) {
+  html {
+    font-size: 11px;
+  }
+}
+
+@keyframes rotatehint {
+  0%, 20% { transform: rotate(0deg); }
+  60%, 100% { transform: rotate(-90deg); }
+}

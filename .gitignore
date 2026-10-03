@@ -1,0 +1,22 @@
+# dépendances et build
+node_modules/
+dist/
+*.tsbuildinfo
+
+# cache et réglages locaux
+.vite/
+.wrangler/
+.claude/settings.local.json
+graphify-out/
+
+# environnement
+.env
+.env.*
+!.env.example
+
+# système / éditeurs
+.DS_Store
+Thumbs.db
+*.log
+.idea/
+.vscode/

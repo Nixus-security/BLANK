@@ -1,0 +1,29 @@
+Sons libres de droits (CC0 / domaine public), aucune attribution requise.
+
+shotgun.mp3 : détonation + action de la pompe (fichier fourni par l utilisateur ; droits selon sa source)
+rack.mp3, reload.mp3 : opengameart.org/content/shotgun-reload-sound-effects (zer0_sol), CC0
+click, grab, thump, beer, loupe, cigarette, saw, handcuffs, pills, adrenaline, inverter (.wav) :
+  opengameart.org/content/fantasy-sound-effects-tinysized-sfx, CC0
+
+door.mp3 : extrait de 4,8 s (44,4 s - 49,2 s, fondus et normalisation de volume) de "Creaking metallic door" (0616),
+  bigsoundbank.com / Joseph Sardin, CC0 : https://bigsoundbank.com/creaking-metallic-door-s0616.html
+
+ambience.ogg :opengameart.org/content/dark-cavern-ambient (Paul Wortmann, dark_cavern_ambient_002), CC0
+
+soundtrack.mp3 : "#3 - Before Every Load" (fichier fourni par l utilisateur ; droits non libres, usage local uniquement)
+
+dealer-signed.mp3 : voix du croupier, "You signed. That was the only choice you were given." (fichier fourni par l utilisateur, généré avec ElevenLabs ; usage selon sa licence ElevenLabs)
+
+soundtrack-2.mp3 : "Buckshot Roulette OST - General Release (extended)" (fichier fourni par l utilisateur ; droits non libres, usage local uniquement ; pochette retirée, audio copié tel quel)
+
+dealer-not-over.mp3 : voix du croupier, « You think it's over? » (fichier fourni par l utilisateur ; usage selon sa licence)
+
+soundtrack-3.mp3 : "Buckshot Roulette - Before Every Load (Hard Techno Remix)" (fichier fourni par l utilisateur ; droits non libres, usage local uniquement ; pochette retirée, audio copié tel quel)
+
+dealer-alone.mp3 : voix du croupier avant la partie 3, "very alone" (fichier fourni par l utilisateur ; usage selon sa licence)
+
+soundtrack-3-socket.mp3 : "Buckshot Roulette - Socket Calibration" (#4, fichier fourni par l utilisateur ; droits non libres, usage local uniquement ; pochette retirée, audio copié tel quel)
+
+soundtrack-end.mp3 : "Buckshot Roulette - Monochrome LCD" (#5, fichier fourni par l utilisateur ; droits non libres, usage local uniquement ; pochette retirée, audio copié tel quel)
+
+soundtrack-car.mp3 : "Buckshot Roulette - 70K" (#6, fichier fourni par l utilisateur ; droits non libres, usage local uniquement ; pochette retirée, audio copié tel quel)
