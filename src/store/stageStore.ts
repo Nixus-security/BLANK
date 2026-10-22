@@ -57,9 +57,11 @@ interface StageStore {
   dealerDead: boolean
   /** L'écran de fin peut s'afficher (après l'animation). */
   endReady: boolean
+  /** Partie multijoueur en cours : la salle de jeu, autour de la table avec les autres joueurs (voir three/multi). */
+  multi: boolean
   /** Objet du plateau momentanément retiré (il est dans la main du joueur ou du croupier). */
   hideTray: ItemId | null
-  set: (p: Partial<Pick<StageStore, 'hideTray' | 'pose'| 'aiming' | 'busy' | 'started' | 'contract' | 'signed' | 'transitioning' | 'entrance' | 'tutorial' | 'chapter' | 'ending' | 'endKind' | 'curtain' | 'endTitle' | 'credits' | 'defibGone' | 'subtitle' | 'death' | 'deathText' | 'interlude' | 'headphones' | 'interludeText' | 'dealerDead' | 'endReady'>>) => void
+  set: (p: Partial<Pick<StageStore, 'hideTray' | 'multi' | 'pose'| 'aiming' | 'busy' | 'started' | 'contract' | 'signed' | 'transitioning' | 'entrance' | 'tutorial' | 'chapter' | 'ending' | 'endKind' | 'curtain' | 'endTitle' | 'credits' | 'defibGone' | 'subtitle' | 'death' | 'deathText' | 'interlude' | 'headphones' | 'interludeText' | 'dealerDead' | 'endReady'>>) => void
 }
 
 export const useStageStore = create<StageStore>((set) => ({
@@ -88,5 +90,6 @@ export const useStageStore = create<StageStore>((set) => ({
   dealerDead: false,
   endReady: false,
   hideTray: null,
+  multi: false,
   set: (p) => set(p),
 }))

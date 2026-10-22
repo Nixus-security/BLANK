@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useLangStore, useTr } from '../i18n'
+import { useNetStore } from '../net/session'
 import { useSoundStore } from '../store/soundStore'
 import { useStageStore } from '../store/stageStore'
 import { unlockAudio } from '../three/audio'
@@ -79,9 +80,8 @@ export function Title() {
           <button onClick={() => setSettings(true)} className="text-bone/90 transition hover:text-blood">
             PARAMETER
           </button>
-          {/* pas encore disponible : visible mais éteint */}
-          <button disabled className="cursor-default text-bone/30">
-            SOON
+          <button onClick={() => useNetStore.getState().setOpen(true)} className="text-bone/90 transition hover:text-blood">
+            MULTIPLAYER
           </button>
         </nav>
       )}

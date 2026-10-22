@@ -369,7 +369,8 @@ export function ItemProps() {
     return out
   }, [scene])
   // menottes qui restent sur le poignet de la victime tant qu'elle n'a pas sauté son tour
-  const cuffMarks = useMemo(() => ({ dealer: buildProp(scene, 'handcuffs'), player: buildProp(scene, 'handcuffs') }), [scene])
+  // (4 exemplaires : en multijoueur, plusieurs joueurs peuvent être menottés)
+  const cuffMarks = useMemo(() => Array.from({ length: 4 }, () => buildProp(scene, 'handcuffs')), [scene])
 
   const shells = useMemo(() => {
     const live = makeVariant(shellScene, LIVE)
@@ -420,12 +421,13 @@ export function ItemProps() {
 
     // menottes posées sur le poignet de la victime (joueur : devant nous ; croupier : sur la table, entre ses mains)
     const act0 = fx.act
-    for (const who of ['dealer', 'player'] as const) {
-      const mark = cuffMarks[who]
+    const spots = fx.cuffSpots ?? [...(game.cuffed.dealer ? [CUFFS_DEALER] : []), ...(game.cuffed.player ? [CUFFS_PLAYER] : [])]
+    for (let i = 0; i < cuffMarks.length; i++) {
+      const mark = cuffMarks[i]
+      const base = spots[i]
       const t0 = act0 && act0.id === 'handcuffs' ? (performance.now() - act0.start) / 1000 : -1
-      mark.outer.visible = game.cuffed[who]
-      if (game.cuffed[who]) {
-        const base = who === 'dealer' ? CUFFS_DEALER : CUFFS_PLAYER
+      mark.outer.visible = !!base
+      if (base) {
         mark.outer.position.set(base.x, base.y + 0.012, base.z)
         mark.outer.quaternion.setFromAxisAngle(Y, 0.3)
         mark.outer.scale.setScalar(LAYOUT.trayScale * 1.35)
@@ -466,23 +468,26 @@ export function ItemProps() {
     for (const k of Object.keys(props) as ItemId[]) if (k !== id) props[k].outer.visible = false
 
     // points d'ancrage de cette image
-    const P0 = (user === 'player') === !act.stolen ? prop.origin : DEALER_POCKET
+    // multijoueur : celui qui agit peut être assis à n'importe quelle place (act.frame : repère du croupier → monde)
+    const F = dealer && act.frame ? act.frame : null
+    const at = (v: Vector3) => (F ? v.clone().applyMatrix4(F) : v)
+    const P0 = act.from ?? ((user === 'player') === !act.stolen ? prop.origin : at(DEALER_POCKET))
     const ax = gunGrips.axis
     const psi = Math.atan2(-ax.x, -ax.z)
     const c: Ctx = {
       user,
       dealer,
       P0,
-      S: dealer ? S_DEALER : S_PLAYER,
-      MOUTH: dealer ? MOUTH_DEALER : MOUTH_PLAYER,
-      ARM: dealer ? ARM_DEALER : ARM_PLAYER,
-      FOE: dealer ? CUFFS_PLAYER : CUFFS_DEALER,
+      S: dealer ? at(S_DEALER) : S_PLAYER,
+      MOUTH: dealer ? at(MOUTH_DEALER) : MOUTH_PLAYER,
+      ARM: dealer ? at(ARM_DEALER) : ARM_PLAYER,
+      FOE: act.foe ?? (dealer ? CUFFS_PLAYER : CUFFS_DEALER),
       ch: gunGrips.chamber,
       saw: gunGrips.saw,
       yaw0: prop.yaw0,
       psi,
       m: PRESENT[id],
-      grow0: P0 === DEALER_POCKET ? 0.05 : 1,
+      grow0: P0 === prop.origin ? 1 : 0.05, // sorti d'une poche : il grandit
       apply: act.apply,
     }
     sample(keysFor(id, c), t)
@@ -520,7 +525,7 @@ export function ItemProps() {
     if (A > 0) pos.sub(tmpV.copy(prop.anchor).multiplyScalar(scale * A).applyQuaternion(prop.outer.quaternion))
     prop.outer.position.copy(pos)
     // menottes : à l'instant où elles se ferment, la copie posée sur le poignet prend le relais
-    const swapped = id === 'handcuffs' && t >= act.apply && game.cuffed[dealer ? 'player' : 'dealer']
+    const swapped = id === 'handcuffs' && t >= act.apply && spots.some((p) => p.distanceToSquared(c.FOE) < 1e-4)
     prop.outer.visible = size > HIDE * 2 && !swapped
     prop.outer.updateMatrixWorld(true)
 
@@ -745,8 +750,9 @@ export function ItemProps() {
       {(Object.keys(props) as ItemId[]).map((id) => (
         <primitive key={id} object={props[id].outer} />
       ))}
-      <primitive object={cuffMarks.dealer.outer} />
-      <primitive object={cuffMarks.player.outer} />
+      {cuffMarks.map((m, i) => (
+        <primitive key={`cuff${i}`} object={m.outer} />
+      ))}
       <primitive object={shells.g} />
       <primitive object={ejected.g} />
       <primitive object={extras.capsule} />

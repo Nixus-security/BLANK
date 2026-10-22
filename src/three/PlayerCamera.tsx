@@ -28,6 +28,14 @@ const dir = new Vector3()
 const DIR0 = look.clone().sub(base).normalize()
 const LOOK_DIST = look.distanceTo(base)
 const BASE_PITCH = Math.asin(DIR0.y)
+/**
+ * Multijoueur : un peu plus en retrait et plus haut, et la tête tourne plus loin, pour voir les joueurs assis aux
+ * deux bouts de la table (à ~45° de chaque côté).
+ */
+const MP_BASE = new Vector3(0, 1.58, 2.6)
+const MP_YAW = 0.5
+/** Plongée en plus (rad) : de plus haut et plus loin, le regard descend pour garder la table au centre. */
+const MP_PITCH = -0.15
 const NO_MOTION = { x: 0, y: 0, z: 0, yaw: 0, pitch: 0, roll: 0, fov: 0 }
 
 /**
@@ -142,7 +150,7 @@ export function PlayerCamera() {
       const st = useStageStore.getState()
       const g = useGameStore.getState().game
       let arousal = st.aiming ? 0.55 : 0
-      if (g.phase === 'playing') {
+      if (g.phase === 'playing' && !st.multi) {
         if (g.hp.player <= 1) arousal += 0.3
         if (g.turn === 'dealer') arousal += 0.12
       }
@@ -151,11 +159,12 @@ export function PlayerCamera() {
       const hm = head.update(t, Math.min(dt, 0.05), Math.min(arousal, 1), st.aiming)
       fast = hm.fast
 
-      const yaw = mouse.current.x * 0.34 + hm.slow.yaw
-      const cp = BASE_PITCH - mouse.current.y * 0.22 + hm.slow.pitch
+      const B = st.multi ? MP_BASE : base
+      const yaw = mouse.current.x * (st.multi ? MP_YAW : 0.34) + hm.slow.yaw
+      const cp = BASE_PITCH + (st.multi ? MP_PITCH : 0) - mouse.current.y * 0.22 + hm.slow.pitch
       dir.set(Math.sin(yaw) * Math.cos(cp), Math.sin(cp), -Math.cos(yaw) * Math.cos(cp))
       // le cou : l'œil est ~10 cm devant le pivot de la tête, il décrit un petit arc quand la tête tourne
-      tPos.set(base.x + hm.slow.x + mouse.current.x * 0.02, base.y + hm.slow.y, base.z + hm.slow.z)
+      tPos.set(B.x + hm.slow.x + mouse.current.x * 0.02, B.y + hm.slow.y, B.z + hm.slow.z)
       tPos.addScaledVector(tmp.copy(dir).sub(DIR0), 0.1)
       tAim.copy(tPos).addScaledVector(dir, LOOK_DIST)
       // cinématique d'explication : la caméra est dirigée vers l'objet, avec un ressort lent (glissé de caméra) ;

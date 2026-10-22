@@ -6,7 +6,7 @@ import { useGameStore } from '../store/gameStore'
  * Cœur gravé, même langage que les objets (ItemIcon) : contour bone, fond noir translucide, détails rouge sang.
  * PV perdu : le contour seul reste, pâli, et le cœur est fendu (le défibrillateur du jeu ne repart pas).
  */
-function Heart({ full }: { full: boolean }) {
+export function Heart({ full }: { full: boolean }) {
   return (
     <svg
       viewBox="0 0 64 64"

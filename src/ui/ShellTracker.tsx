@@ -5,7 +5,7 @@ import { useGameStore } from '../store/gameStore'
  * Cartouche gravée (viewBox 28 × 64), même langage que les objets (ItemIcon) : contour bone, fond noir translucide,
  * bande rouge sang (réelle) ou bleue (à blanc, comme les voyants de l'inverseur), culot rouille.
  */
-function Shell({ live }: { live: boolean }) {
+export function Shell({ live }: { live: boolean }) {
   return (
     <svg
       viewBox="0 0 28 64"

@@ -18,6 +18,7 @@ import { SelfTarget } from './SelfTarget'
 import { ShellRow } from './ShellRow'
 import { Tray } from './Tray'
 import { Shotgun } from './Shotgun'
+import { MultiTable } from './multi/MultiTable'
 
 export function GameScene() {
   // titre : passerelle-halle.glb ; contrat : environnement-salle.glb brut ; partie : salle de jeu modifiée
@@ -25,7 +26,8 @@ export function GameScene() {
   const contract = useStageStore((s) => s.contract)
   const ending = useStageStore((s) => s.ending) // fin du jeu : la scène du néant ou de la voiture remplace la salle
   const car = useStageStore((s) => s.endKind === 'car')
-  const inRoom = started || contract // caméra de la salle (contrat ou partie)
+  const multi = useStageStore((s) => s.multi) // partie multijoueur : la même salle, d'autres joueurs autour de la table
+  const inRoom = started || contract || multi // caméra de la salle (contrat ou partie)
   return (
     <Canvas
       shadows={{ type: BasicShadowMap }} // ombres dures, crénelées : look PS1
@@ -45,18 +47,24 @@ export function GameScene() {
           <ContractScene />
         </group>
         {/* partie : salle de jeu modifiée (accessoires remplacés, spot dédié, fusil, plateau, cartouches) */}
-        <group visible={started && !ending}>
+        <group visible={(started && !ending) || multi}>
           <Lighting />
           <FocusLight />
           <Room />
           <Shotgun />
-          <SelfTarget />
-          <Tray />
           <ItemProps />
-          <ShellRow />
+          {multi ? (
+            <MultiTable />
+          ) : (
+            <>
+              <SelfTarget />
+              <Tray />
+              <ShellRow />
+            </>
+          )}
         </group>
-        {/* le croupier n'apparaît qu'en partie (absent de la scène du contrat) */}
-        <group visible={started && !ending}>
+        {/* le croupier n'apparaît qu'en partie solo (absent de la scène du contrat et du multijoueur) */}
+        <group visible={started && !ending && !multi}>
           <Croupier />
         </group>
         {/* fin du jeu : le néant et son portail */}

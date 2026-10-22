@@ -1,18 +1,18 @@
 import { useGLTF } from '@react-three/drei'
 import { useFrame, useThree } from '@react-three/fiber'
 import { useEffect, useMemo, useRef } from 'react'
-import { Euler, Mesh, Plane, Quaternion, Vector3, type Group, type MeshStandardMaterial, type PointLight } from 'three'
+import { Mesh, Plane, Quaternion, Vector3, type Group, type MeshStandardMaterial, type PointLight } from 'three'
 import { useGameStore } from '../store/gameStore'
-import { useStageStore, type Pose } from '../store/stageStore'
+import { useStageStore } from '../store/stageStore'
 import { toggleAim } from './director'
+import { HALF_PI, HELD } from './gunPoses'
+import { mpCanAct, mpToggleAim } from './multi/mpDirector'
 import { fx } from './fx'
 import { gunGrips } from './grips'
 import { MODELS } from './models'
 import { setupShadows } from './prepare'
 import { useRoom } from './Room'
 
-const q = (pitch: number, yaw: number, roll = 0) => new Quaternion().setFromEuler(new Euler(roll, yaw, pitch, 'YXZ'))
-const HALF_PI = Math.PI / 2
 /** Le fusil au repos est décalé vers la droite : sa crosse recouvrait la canette du plateau d'objets (x -0,41 à -0,34). */
 const REST_SHIFT = new Vector3(0.24, 0, 0)
 /**
@@ -24,16 +24,6 @@ const REST_ROLL = new Quaternion().setFromAxisAngle(new Vector3(1, 0, 0), HALF_P
 const FLAT_RECENTER = -0.105
 const FLAT_HALF_THICKNESS = 0.034
 const TABLE_TOP_Y = 0.78
-
-/** Poses monde du fusil (le canon pointe vers +X en local ; yaw +90° = vers -Z, i.e. le croupier). */
-const HELD: Record<Exclude<Pose, 'rest'>, { p: Vector3; r: Quaternion }> = {
-  playerDealer: { p: new Vector3(0.12, 0.98, 0.95), r: q(0.05, HALF_PI) },
-  playerSelf: { p: new Vector3(0.0, 1.0, 1.2), r: q(0.25, -HALF_PI) },
-  dealerPlayer: { p: new Vector3(0.0, 0.95, 0.42), r: q(0.08, -HALF_PI) },
-  dealerSelf: { p: new Vector3(0.0, 1.16, 0.7), r: q(-0.12, HALF_PI) },
-  /** Le croupier prend le fusil pour s'en servir avec un objet (scie, loupe, inverseur, bière) : tenu de profil devant lui. */
-  dealerShow: { p: new Vector3(0.05, 0.97, 0.6), r: q(0.04, 0) },
-}
 
 /** Fusil interactif : clic = le prendre/reposer ; les poses sont pilotées par stageStore. */
 export function Shotgun() {
@@ -61,7 +51,7 @@ export function Shotgun() {
     setupShadows(c)
     return c
   }, [scene, cut])
-  const sawed = useGameStore((s) => s.game.sawed.player || s.game.sawed.dealer)
+  const slice = useRef<Mesh>(null)
 
   const group = useRef<Group>(null)
   const light = useRef<PointLight>(null)
@@ -82,13 +72,14 @@ export function Shotgun() {
     cur.current ??= { p: rest.p.clone(), r: rest.r.clone() }
     const c = cur.current
     const pose = useStageStore.getState().pose
-    const target = pose === 'rest' ? rest : HELD[pose]
+    // multijoueur : la pose vient du réalisateur multi (n'importe quelle place, n'importe quelle cible)
+    const target = fx.gunTarget ? fx.gunTarget(rest) : pose === 'rest' ? rest : HELD[pose]
     const k = 1 - Math.exp(-9 * dt)
     c.p.lerp(target.p, k)
     c.r.slerp(target.r, k)
     g.position.copy(c.p)
     g.quaternion.copy(c.r)
-    if (pose !== 'rest') g.position.y += Math.sin(clock.elapsedTime * 2.3) * 0.004
+    if (target !== rest) g.position.y += Math.sin(clock.elapsedTime * 2.3) * 0.004
     // recul : recule le long du canon et se cabre
     tmp.set(1, 0, 0).applyQuaternion(c.r)
     g.position.addScaledVector(tmp, -fx.recoil * 0.14)
@@ -113,7 +104,9 @@ export function Shotgun() {
     gunGrips.axis.set(1, 0, 0).transformDirection(g.matrixWorld)
     // canon scié : tout ce qui dépasse du point de coupe disparaît (la scie vient de le détacher, voir ItemProps)
     const gs = useGameStore.getState().game.sawed
-    if (gs.player || gs.dealer) {
+    const sawed = fx.sawed ?? (gs.player || gs.dealer)
+    if (slice.current) slice.current.visible = sawed
+    if (sawed) {
       cut.normal.copy(gunGrips.axis).negate()
       cut.constant = gunGrips.axis.dot(gunGrips.saw)
     } else {
@@ -123,6 +116,7 @@ export function Shotgun() {
   })
 
   const canGrab = useGameStore((s) => s.game.turn === 'player' && s.game.phase === 'playing')
+  const multi = useStageStore((s) => s.multi)
 
   return (
     <group
@@ -132,14 +126,15 @@ export function Shotgun() {
       scale={gun?.scale}
       onClick={(e) => {
         e.stopPropagation()
-        toggleAim()
+        if (multi) mpToggleAim()
+        else toggleAim()
       }}
-      onPointerOver={() => canGrab && (document.body.style.cursor = 'pointer')}
+      onPointerOver={() => (multi ? mpCanAct() : canGrab) && (document.body.style.cursor = 'pointer')}
       onPointerOut={() => (document.body.style.cursor = '')}
     >
       <primitive object={obj} name="shotgun" />
       {/* tranche du canon scié : métal nu, à l'endroit de la coupe */}
-      <mesh position={[0.42, 0.125, 0]} visible={sawed}>
+      <mesh ref={slice} position={[0.42, 0.125, 0]} visible={false}>
         <boxGeometry args={[0.006, 0.085, 0.036]} />
         <meshStandardMaterial color="#9a9a98" metalness={0.7} roughness={0.35} />
       </mesh>

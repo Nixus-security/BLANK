@@ -1,4 +1,11 @@
+import type { Quaternion, Vector3 } from 'three'
 import type { ActState } from './itemActs'
+
+/** Pose monde du fusil. */
+export interface GunPose {
+  p: Vector3
+  r: Quaternion
+}
 
 /** Effets transitoires (mutés hors React, lus chaque frame par la caméra, le fusil et le post-traitement). */
 export const fx = {
@@ -53,6 +60,12 @@ export const fx = {
   flicker: 0,
   /** Niveau instantané de la lampe (1 = normal, ~0 = éteinte) : lu par le son de grésillement pour rester synchrone. */
   lamp: 1,
+  /** Multijoueur : pose voulue du fusil (reçoit la pose de repos solo), remplace stageStore.pose ; null = jeu solo. */
+  gunTarget: null as ((rest: GunPose) => GunPose) | null,
+  /** Multijoueur : canon scié ? (null = lu dans le jeu solo) */
+  sawed: null as boolean | null,
+  /** Multijoueur : poignets menottés (menottes posées dessus) ; null = jeu solo. */
+  cuffSpots: null as Vector3[] | null,
 }
 
 /** Entrée dans la salle : marche lente depuis l'obscurité, puis on s'assoit (durées en s, repères en m). */

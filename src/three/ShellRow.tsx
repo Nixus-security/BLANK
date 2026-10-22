@@ -25,8 +25,13 @@ export function makeVariant(src: Group, color: Color) {
  * Le décompte est public (annoncé au chargement) ; l'ordre de tir, lui, reste caché.
  */
 export function ShellRow() {
-  const { scene } = useGLTF(MODELS.shell)
   const remaining = useGameStore((s) => s.game.remaining)
+  return <ShellRowView remaining={remaining} x={LAYOUT.shellRow[0]} z={LAYOUT.shellRow[1]} />
+}
+
+/** Rangée de cartouches centrée sur (x, z). */
+export function ShellRowView({ remaining, x, z }: { remaining: { live: number; blank: number }; x: number; z: number }) {
+  const { scene } = useGLTF(MODELS.shell)
   const variants = useMemo(() => ({ live: makeVariant(scene, LIVE), blank: makeVariant(scene, BLANK) }), [scene])
 
   const shells = [
@@ -34,7 +39,7 @@ export function ShellRow() {
     ...Array.from({ length: Math.max(remaining.blank, 0) }, () => 'blank' as const),
   ]
   const spacing = 0.05
-  const x0 = LAYOUT.shellRow[0] - ((shells.length - 1) * spacing) / 2
+  const x0 = x - ((shells.length - 1) * spacing) / 2
 
   return (
     <group>
@@ -42,7 +47,7 @@ export function ShellRow() {
         <primitive
           key={`${kind}${i}`}
           object={variants[kind].clone(true)}
-          position={[x0 + i * spacing, LAYOUT.tableTopY, LAYOUT.shellRow[1]]}
+          position={[x0 + i * spacing, LAYOUT.tableTopY, z]}
           rotation={[0, i * 1.7, 0]}
           scale={1.4}
         />

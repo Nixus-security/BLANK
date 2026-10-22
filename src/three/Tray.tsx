@@ -34,10 +34,38 @@ const UNOWNED_DIM = 0.45
  * et inertes.
  */
 export function Tray() {
-  const { scene } = useGLTF(MODELS.inventory)
   const inventory = useGameStore((s) => s.game.inventory.player)
   const tutorial = useStageStore((s) => s.tutorial) // cinématique d'explication : tous les objets éclairés
   const hidden = useStageStore((s) => s.hideTray) // objet en main (animation d'utilisation) : il quitte le plateau
+  return (
+    <TrayView
+      inventory={inventory}
+      lit={tutorial}
+      hidden={hidden}
+      position={LAYOUT.tray}
+      scale={LAYOUT.trayScale}
+      onUse={(id) => void playerUseItem(id)}
+    />
+  )
+}
+
+interface TrayViewProps {
+  inventory: readonly ItemId[]
+  /** Tous les objets éclairés (cinématique d'explication). */
+  lit?: boolean
+  hidden?: ItemId | null
+  position: readonly [number, number, number]
+  /** Rotation autour de la verticale (plateau d'un autre joueur, en multijoueur). */
+  yaw?: number
+  scale: number
+  /** Clic sur un objet possédé ; absent = plateau inerte (celui d'un autre joueur). */
+  onUse?: (id: ItemId) => void
+}
+
+/** Un plateau d'objets (le nôtre, ou celui d'un adversaire en multijoueur). */
+export function TrayView({ inventory, lit = false, hidden = null, position, yaw = 0, scale, onUse }: TrayViewProps) {
+  const { scene } = useGLTF(MODELS.inventory)
+  const tutorial = lit
   const obj = useMemo(() => {
     const c = scene.clone(true)
     setupShadows(c)
@@ -74,18 +102,19 @@ export function Tray() {
     <primitive
       object={obj}
       name="tray"
-      position={[...LAYOUT.tray]}
-      scale={LAYOUT.trayScale}
+      position={[...position]}
+      rotation={[0, yaw, 0]}
+      scale={scale}
       onClick={(e: { object: Object3D; stopPropagation: () => void }) => {
         const name = itemOf(e.object)
-        if (!name) return
+        if (!name || !onUse) return
         e.stopPropagation()
         if (!inventory.includes(ITEM_NODES[name])) return // posé sur la table mais pas dans l'inventaire
-        void playerUseItem(ITEM_NODES[name])
+        onUse(ITEM_NODES[name])
       }}
       onPointerOver={(e: { object: Object3D }) => {
         const name = itemOf(e.object)
-        if (name && inventory.includes(ITEM_NODES[name])) document.body.style.cursor = 'pointer'
+        if (onUse && name && inventory.includes(ITEM_NODES[name])) document.body.style.cursor = 'pointer'
       }}
       onPointerOut={() => (document.body.style.cursor = '')}
     />

@@ -1,4 +1,5 @@
 import { useTr } from '../i18n'
+import { useNetStore } from '../net/session'
 import { useStageStore } from '../store/stageStore'
 import { SignHint } from './SignHint'
 import { CarStats } from './CarStats'
@@ -12,6 +13,8 @@ import { Interlude } from './Interlude'
 import { Inventory } from './Inventory'
 import { LoadBanner } from './LoadBanner'
 import { LogPanel } from './LogPanel'
+import { Multiplayer } from './Multiplayer'
+import { MultiHud } from './MultiHud'
 import { ShellTracker } from './ShellTracker'
 import { SoundButton } from './SoundButton'
 import { Subtitles } from './Subtitles'
@@ -29,6 +32,8 @@ export function Overlay() {
   const contract = useStageStore((s) => s.contract)
   const entrance = useStageStore((s) => s.entrance)
   const ending = useStageStore((s) => s.ending)
+  const lobby = useNetStore((s) => s.open)
+  const multi = useStageStore((s) => s.multi)
   return (
     <div className="pointer-events-none absolute inset-0 select-none font-crt text-bone">
       {started && !entrance && !ending && (
@@ -51,7 +56,8 @@ export function Overlay() {
       <Ending />
       <CarStats />
       {contract && <SignHint />}
-      {!started && !contract && <Title />}
+      {multi && <MultiHud />}
+      {!started && !contract && !multi && (lobby ? <Multiplayer /> : <Title />)}
 
       <Subtitles />
 

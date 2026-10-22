@@ -143,6 +143,11 @@ t('adrénaline : vole et utilise un objet ; refusée sans cible utilisable', () 
   const h = fixture([true, false]); h.inventory.player = ['adrenaline']; h.inventory.dealer = ['cigarette'] // PV pleins : inutilisable
   assert.equal(useItem(h, 'player', 0), h)
 })
+t('adrénaline : objet volé utilisé une seule fois', () => {
+  const g = fixture([true, false, true]); g.inventory.player = ['adrenaline']; g.inventory.dealer = ['beer']
+  const s = useItem(g, 'player', 0)
+  assert.equal(s.chamber.length, 2)
+})
 t('IA : scie puis menottes avant de viser le joueur', () => {
   const g = fixture([true, true, false], 'dealer'); g.inventory.dealer = ['handcuffs', 'saw']
   assert.deepEqual(decideDealer(g), { type: 'item', index: 1 })

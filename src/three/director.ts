@@ -6,6 +6,7 @@ import type { Actor, GameState, ItemId } from '../game/types'
 import { useGameStore } from '../store/gameStore'
 import { useSoundStore } from '../store/soundStore'
 import { useStatsStore } from '../store/statsStore'
+import { useNetStore } from '../net/session'
 import { interludeText, useStageStore, type Pose } from '../store/stageStore'
 import { audioLive, audioRunning, CARDIAC, playBlip, playCardiacArrest, playChair, playDealerRise, playDealerThrown, playFootstep, playMetalDoor, playEntityVoice, playTypeTick, playVoicePlaceholder, sfxLength, type SfxName, startLightBuzz, setMusic, setMusicRoom, setMusicTrack, playTransition, startCarAmbience, playClick, playShot, preloadSounds, sfx, unlockAudio } from './audio'
 import { CREDITS_SECONDS } from '../ui/credits'
@@ -842,9 +843,11 @@ export function restart() {
 /** R = nouvelle partie. À appeler une fois au démarrage. */
 export function installKeys() {
   const onKey = (e: KeyboardEvent) => {
+    // saisie (pseudo, code de salon) : aucune touche de jeu
+    if (e.target instanceof HTMLInputElement && e.target.type !== 'range') return
     // Entrée lance la partie, sauf sur un bouton ou un réglage de l'écran d'accueil (c'est lui qui réagit : BACK, volume…)
     const onControl = e.target instanceof HTMLElement && ['BUTTON', 'INPUT'].includes(e.target.tagName)
-    if (e.key === 'Enter' && !stage().started && !(onControl && !(e.target as HTMLElement).textContent?.includes('PLAY'))) void startGame()
+    if (e.key === 'Enter' && !stage().started && !useNetStore.getState().open && !(onControl && !(e.target as HTMLElement).textContent?.includes('PLAY'))) void startGame()
     if (e.key.toLowerCase() === 'm') {
       // tant que la musique n'est pas audible, M sert à l'activer (le geste débloque l'audio) et jamais à la couper
       if (!audioLive() && !useSoundStore.getState().muted) unlockAudio()

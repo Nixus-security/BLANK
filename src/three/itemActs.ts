@@ -1,3 +1,4 @@
+import type { Matrix4, Vector3 } from 'three'
 import type { Actor, ItemId } from '../game/types'
 
 /** Durées (s) de la mise en scène de chaque objet, et instant où l'effet est appliqué à l'état du jeu. */
@@ -31,5 +32,11 @@ export interface ActState {
   shell: boolean | null
   /** Pilules : bon résultat (+PV) ? */
   good: boolean
+  /** Multijoueur : place de celui qui agit (repère du croupier → monde) quand ce n'est pas nous. */
+  frame?: Matrix4 | null
+  /** Multijoueur : poignets de la victime des menottes. */
+  foe?: Vector3 | null
+  /** Multijoueur : d'où vient l'objet (poche de celui à qui on le vole…) ; défaut : plateau ou poche du croupier. */
+  from?: Vector3 | null
 }
 

@@ -127,9 +127,11 @@ export const ITEMS: Record<ItemId, ItemDef> = {
       const pick = pool[Math.floor(random() * pool.length)]
       s.inventory[opp(user)].splice(pick.i, 1)
       const stolen = ITEMS[pick.id].label.toLowerCase()
+      // un seul appel : tr() évalue ses 2 arguments, l'objet serait utilisé 2 fois
+      const used = ITEMS[pick.id].use(s, user)
       return tr(
-        `${who(user)} s'injecte de l'adrénaline et vole : ${stolen}. ${ITEMS[pick.id].use(s, user)}`,
-        `${who(user)} ${s3(user, 'inject')} adrenaline and ${s3(user, 'steal')}: ${stolen}. ${ITEMS[pick.id].use(s, user)}`,
+        `${who(user)} s'injecte de l'adrénaline et vole : ${stolen}. ${used}`,
+        `${who(user)} ${s3(user, 'inject')} adrenaline and ${s3(user, 'steal')}: ${stolen}. ${used}`,
       )
     },
   },
